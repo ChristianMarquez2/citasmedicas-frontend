@@ -1,0 +1,80 @@
+/* =======================
+   PÁGINA PÚBLICA
+   ======================= */
+.public-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* LOGO */
+.public-page .logo {
+  height: 6em;
+  padding: 1.5em;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
+}
+
+.public-page .logo:hover {
+  filter: drop-shadow(0 0 1.5em rgba(100, 108, 255, 0.6));
+  transform: scale(1.05);
+}
+
+.public-page .logo.react:hover {
+  filter: drop-shadow(0 0 1.5em rgba(97, 218, 251, 0.7));
+}
+
+/* SPIN ANIMATION */
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .public-page a:nth-of-type(2) .logo {
+    animation: logo-spin 20s linear infinite;
+  }
+}
+
+/* CARD */
+.public-page .card {
+  padding: 2rem;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  text-align: left;
+  width: 100%;
+  max-width: 360px;
+}
+
+.public-page .card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* TEXTO */
+.public-page .read-the-docs {
+  color: #6c757d; /* gris Bootstrap */
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .public-page {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .public-page .card {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+}
+

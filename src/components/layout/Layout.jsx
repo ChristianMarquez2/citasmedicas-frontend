@@ -3,14 +3,14 @@ import Sidebar from "./Sidebar";
 
 export default function Layout({ children }) {
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="d-flex vh-100 bg-light">
       {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main content */}
-      <div className="flex flex-col flex-1">
-        <Navbar />
-        <main className="p-6 overflow-y-auto">{children}</main>
+      <div className="layout">
+        <Sidebar />
+        <div className="d-flex flex-column flex-grow-1 overflow-hidden main-content">
+          <Navbar />
+          <main className="flex-grow-1 p-4 overflow-auto">{children}</main>
+        </div>
       </div>
     </div>
   );

@@ -9,9 +9,30 @@ export default function SpecialtyForm({ specialty, onClose, onSaved }) {
 
   const { showToast, Toast } = useToast();
 
+  const [saving, setSaving] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return;
+
+    // Validaciones
+    if (!/^[A-Za-z0-9]{2,10}$/.test(codigo)) {
+      showToast("El código debe tener entre 2 y 10 caracteres alfanuméricos", "error");
+      return;
+    }
+
+    if (nombre.trim().length < 2) {
+      showToast("El nombre debe tener al menos 2 caracteres", "error");
+      return;
+    }
+
+    if (descripcion.trim().length < 5) {
+      showToast("La descripción debe tener al menos 5 caracteres", "error");
+      return;
+    }
+
     const payload = { codigo, nombre, descripcion };
+    setSaving(true);
 
     try {
       if (specialty) {
@@ -25,57 +46,60 @@ export default function SpecialtyForm({ specialty, onClose, onSaved }) {
       onClose();
     } catch (error) {
       showToast("Error guardando especialidad", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
+    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: "rgba(0,0,0,0.3)", zIndex: 1050 }}>
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-96"
+        className="bg-white p-4 rounded shadow w-100" style={{ maxWidth: 400 }}
       >
-        <h2 className="text-xl mb-4">{specialty ? "Editar Especialidad" : "Nueva Especialidad"}</h2>
+        <h2 className="h5 mb-4">{specialty ? "Editar Especialidad" : "Nueva Especialidad"}</h2>
 
-        <div className="mb-2">
-          <label className="block mb-1">Código</label>
+        <div className="mb-3">
+          <label className="form-label">Código</label>
           <input
             value={codigo}
             onChange={(e) => setCodigo(e.target.value)}
-            className="w-full border px-2 py-1"
+            className="form-control"
             required
           />
         </div>
 
-        <div className="mb-2">
-          <label className="block mb-1">Nombre</label>
+        <div className="mb-3">
+          <label className="form-label">Nombre</label>
           <input
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="w-full border px-2 py-1"
+            className="form-control"
             required
           />
         </div>
 
-        <div className="mb-2">
-          <label className="block mb-1">Descripción</label>
+        <div className="mb-3">
+          <label className="form-label">Descripción</label>
           <input
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            className="w-full border px-2 py-1"
+            className="form-control"
             required
           />
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="d-flex justify-content-end mt-4">
           <button
             type="button"
-            className="mr-2 px-4 py-2 border rounded"
+            className="btn btn-outline-secondary me-2"
             onClick={onClose}
           >
             Cancelar
           </button>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
-            Guardar
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving ? "Guardando..." : "Guardar"}
           </button>
         </div>
 

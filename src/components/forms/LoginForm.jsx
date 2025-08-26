@@ -1,46 +1,58 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import * as authApi from "../../api/auth.api";
+import { useToast } from "../../hooks/useToast.jsx";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const { showToast, Toast } = useToast();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
+    setLoading(true);
     try {
       await login({ email, password });
-    } catch (err) {
-      setError("Credenciales inválidas");
+      showToast("Inicio de sesión exitoso", "success");
+      navigate("/"); // redirige al dashboard
+    } catch (error) {
+      showToast(error.response?.data?.message || "Error al iniciar sesión", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-sm mx-auto bg-white shadow-md rounded p-6 space-y-4"
+      className="card shadow-sm p-4"
+      style={{ maxWidth: "400px", margin: "0 auto" }}
     >
-      <h2 className="text-xl font-bold text-center">Iniciar sesión</h2>
+      <h2 className="text-center mb-4">Iniciar sesión</h2>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-
-      <div>
-        <label className="block text-sm font-medium">Email</label>
+      <div className="mb-3">
+        <label className="form-label">Email</label>
         <input
           type="email"
-          className="w-full border rounded px-3 py-2"
+          className="form-control"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium">Contraseña</label>
+      <div className="mb-3">
+        <label className="form-label">Contraseña</label>
         <input
           type="password"
-          className="w-full border rounded px-3 py-2"
+          className="form-control"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -49,10 +61,13 @@ const LoginForm = () => {
 
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        disabled={loading}
+        className="btn btn-primary w-100"
       >
-        Entrar
+        {loading ? "Entrando..." : "Entrar"}
       </button>
+
+      <Toast />
     </form>
   );
 };

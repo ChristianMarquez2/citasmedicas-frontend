@@ -5,10 +5,10 @@ import { useAuth } from "../hooks/useAuth";
 const LoginPage = () => {
   const { user } = useAuth();
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to="/Dashboard" replace />;
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
+    <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
       <LoginForm />
     </div>
   );

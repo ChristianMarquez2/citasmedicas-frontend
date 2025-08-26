@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export function useToast() {
   const [message, setMessage] = useState(null);
   const [type, setType] = useState("info");
+  const timeoutRef = useRef(null);
 
   function showToast(msg, type = "info") {
     setMessage(msg);
     setType(type);
-    setTimeout(() => setMessage(null), 3000);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setMessage(null), 3000);
   }
 
   function Toast() {

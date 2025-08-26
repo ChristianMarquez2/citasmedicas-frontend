@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+// App.jsx
+import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import PatientsPage from "./pages/PatientsPage";
@@ -9,12 +10,12 @@ import PrivateRoute from "./auth/PrivateRoute";
 function App() {
   return (
     <Routes>
-      {/* Public */}
+      {/* Ruta pública */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Private */}
+      {/* Rutas privadas */}
       <Route
-        path="/"
+        path="/dashboard"
         element={
           <PrivateRoute>
             <DashboardPage />
@@ -46,8 +47,21 @@ function App() {
         }
       />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" />} />
+      {/* Página 404 */}
+      <Route
+        path="*"
+        element={
+          <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+            <div className="text-center">
+              <h1 className="display-4 fw-bold text-danger">404</h1>
+              <p className="lead">Página no encontrada</p>
+              <a href="/" className="btn btn-primary">
+                Ir al inicio
+              </a>
+            </div>
+          </div>
+        }
+      />
     </Routes>
   );
 }
