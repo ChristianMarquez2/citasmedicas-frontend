@@ -1,5 +1,4 @@
-// App.jsx
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import PatientsPage from "./pages/PatientsPage";
@@ -10,6 +9,9 @@ import PrivateRoute from "./auth/PrivateRoute";
 function App() {
   return (
     <Routes>
+      {/* Redirigir la raíz al login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
       {/* Ruta pública */}
       <Route path="/login" element={<LoginPage />} />
 
