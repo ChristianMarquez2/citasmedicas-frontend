@@ -17,15 +17,31 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
     e.preventDefault();
     if (saving) return;
 
-    // Validaciones
-    if (!codigo || parseInt(codigo) <= 0) {
+    // --- Validaciones ---
+    const codigoNum = parseInt(codigo);
+
+    // Código: obligatorio, numérico, positivo, máx. 6 dígitos
+    if (!codigo || isNaN(codigoNum) || codigoNum <= 0) {
       showToast("El código debe ser un número positivo", "error");
       return;
     }
-    if (!descripcion || descripcion.trim().length < 5) {
+    if (codigo.toString().length > 6) {
+      showToast("El código no puede superar los 6 dígitos", "error");
+      return;
+    }
+
+    // Descripción: obligatorio, entre 5 y 200 caracteres
+    const descripcionTrim = descripcion.trim();
+    if (!descripcionTrim || descripcionTrim.length < 5) {
       showToast("La descripción debe tener al menos 5 caracteres", "error");
       return;
     }
+    if (descripcionTrim.length > 200) {
+      showToast("La descripción no puede superar los 200 caracteres", "error");
+      return;
+    }
+
+    // Selección de paciente y especialidad
     if (!idPaciente) {
       showToast("Debe seleccionar un paciente", "error");
       return;
@@ -34,6 +50,8 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
       showToast("Debe seleccionar una especialidad", "error");
       return;
     }
+
+    // Fecha: válida y en el futuro
     const fechaDate = new Date(fecha);
     if (isNaN(fechaDate.getTime())) {
       showToast("Fecha inválida", "error");
@@ -44,9 +62,10 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
       return;
     }
 
+    // --- Payload listo ---
     const payload = {
-      codigo: parseInt(codigo),
-      descripcion,
+      codigo: codigoNum,
+      descripcion: descripcionTrim,
       id_paciente: idPaciente,
       id_especialidad: idEspecialidad,
       fecha: fechaDate.toISOString(),
@@ -70,33 +89,38 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
     }
   };
 
+
   const fields = [
-    { 
-      label: "Código", 
-      value: codigo, 
-      setter: setCodigo, 
+    {
+      label: "Código",
+      value: codigo,
+      setter: setCodigo,
       type: "number",
       placeholder: "Ingrese el código",
       required: true,
-      help: "Debe ser un número positivo"
+      help: "Debe ser un número positivo (máx. 6 dígitos)",
+      maxLength: 6, // 👈
+      min: 1        // 👈 asegura que no sea negativo ni cero
     },
-    { 
-      label: "Descripción", 
-      value: descripcion, 
+    {
+      label: "Descripción",
+      value: descripcion,
       setter: setDescripcion,
       placeholder: "Ingrese la descripción de la cita",
       required: true,
       type: "textarea",
-      help: "Mínimo 5 caracteres"
+      help: "Entre 5 y 200 caracteres",
+      maxLength: 200 // 👈
     },
-    { 
-      label: "Fecha y Hora", 
-      value: fecha, 
-      setter: setFecha, 
+    {
+      label: "Fecha y Hora",
+      value: fecha,
+      setter: setFecha,
       type: "datetime-local",
       required: true
     },
   ];
+
 
   return (
     <div className="appointment-form-overlay">
@@ -118,7 +142,7 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
                 {field.label}
                 {field.required && <span className="required">*</span>}
               </label>
-              
+
               {field.type === 'textarea' ? (
                 <textarea
                   value={field.value}
@@ -136,9 +160,12 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
                   className="form-input"
                   placeholder={field.placeholder}
                   required={field.required}
+                  maxLength={field.maxLength || undefined} // 👈 aplica si existe
+                  min={field.min || undefined}             // 👈 aplica si existe
                 />
+
               )}
-              
+
               {field.help && (
                 <small className="input-help">{field.help}</small>
               )}
@@ -195,8 +222,8 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
           >
             Cancelar
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn-save"
             disabled={saving}
           >
