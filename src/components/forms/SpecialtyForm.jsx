@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { createSpecialty, updateSpecialty } from "../../api/specialties.api.js";
 import { useToast } from "../../hooks/useToast.jsx";
+import "../styles/SpecialtyForm.css"; // Importamos los estilos CSS
 
 export default function SpecialtyForm({ specialty, onClose, onSaved }) {
   const [codigo, setCodigo] = useState(specialty?.codigo || "");
   const [nombre, setNombre] = useState(specialty?.nombre || "");
   const [descripcion, setDescripcion] = useState(specialty?.descripcion || "");
-
   const { showToast, Toast } = useToast();
-
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -37,69 +36,100 @@ export default function SpecialtyForm({ specialty, onClose, onSaved }) {
     try {
       if (specialty) {
         await updateSpecialty(specialty._id, payload);
-        showToast("Especialidad actualizada", "success");
+        showToast("Especialidad actualizada correctamente", "success");
       } else {
         await createSpecialty(payload);
-        showToast("Especialidad creada", "success");
+        showToast("Especialidad creada correctamente", "success");
       }
       onSaved();
       onClose();
     } catch (error) {
-      showToast("Error guardando especialidad", "error");
+      showToast(error.response?.data?.message || "Error guardando especialidad", "error");
     } finally {
       setSaving(false);
     }
   };
 
-
   return (
-    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: "rgba(0,0,0,0.3)", zIndex: 1050 }}>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-4 rounded shadow w-100" style={{ maxWidth: 400 }}
-      >
-        <h2 className="h5 mb-4">{specialty ? "Editar Especialidad" : "Nueva Especialidad"}</h2>
+    <div className="specialty-form-overlay">
+      <form onSubmit={handleSubmit} className="specialty-form">
+        <div className="form-header">
+          <h2>
+            <i className="fas fa-stethoscope"></i>
+            {specialty ? "Editar Especialidad" : "Nueva Especialidad"}
+          </h2>
+          <button type="button" className="btn-close-form" onClick={onClose}>
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
 
-        <div className="mb-3">
-          <label className="form-label">Código</label>
+        <div className="form-group">
+          <label htmlFor="codigo">Código</label>
           <input
+            id="codigo"
+            type="text"
             value={codigo}
             onChange={(e) => setCodigo(e.target.value)}
-            className="form-control"
+            className="form-input"
+            placeholder="Ej: CAR001"
             required
           />
+          <small className="input-help">2-10 caracteres alfanuméricos</small>
         </div>
 
-        <div className="mb-3">
-          <label className="form-label">Nombre</label>
+        <div className="form-group">
+          <label htmlFor="nombre">Nombre</label>
           <input
+            id="nombre"
+            type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="form-control"
+            className="form-input"
+            placeholder="Ej: Cardiología"
             required
           />
+          <small className="input-help">Mínimo 2 caracteres</small>
         </div>
 
-        <div className="mb-3">
-          <label className="form-label">Descripción</label>
-          <input
+        <div className="form-group">
+          <label htmlFor="descripcion">Descripción</label>
+          <textarea
+            id="descripcion"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            className="form-control"
+            className="form-textarea"
+            placeholder="Describa la especialidad médica..."
+            rows="3"
             required
           />
+          <small className="input-help">Mínimo 5 caracteres</small>
         </div>
 
-        <div className="d-flex justify-content-end mt-4">
+        <div className="form-actions">
           <button
             type="button"
-            className="btn btn-outline-secondary me-2"
+            className="btn-cancel"
             onClick={onClose}
+            disabled={saving}
           >
             Cancelar
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Guardando..." : "Guardar"}
+          <button 
+            type="submit" 
+            className="btn-save"
+            disabled={saving}
+          >
+            {saving ? (
+              <>
+                <span className="spinner-small"></span>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-save"></i>
+                Guardar
+              </>
+            )}
           </button>
         </div>
 

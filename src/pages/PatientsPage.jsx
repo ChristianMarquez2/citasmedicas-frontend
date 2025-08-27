@@ -6,6 +6,7 @@ import Navbar from "../components/layout/Navbar";
 import Sidebar from "../components/layout/Sidebar";
 import { useAuth } from "../hooks/useAuth";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/PatientsPage.css"; // Importamos los estilos CSS
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState([]);
@@ -16,15 +17,9 @@ export default function PatientsPage() {
   const { showToast, Toast } = useToast();
   const { user } = useAuth();
 
-
-  
   useEffect(() => {
     document.title = "Pacientes - Dashboard";
-  }, []);
-
-  useEffect(() => {
     fetchPatients();
-    
   }, []);
 
   const fetchPatients = async () => {
@@ -45,7 +40,6 @@ export default function PatientsPage() {
       }
     } catch (error) {
       showToast("Error cargando pacientes", "error");
-      
     } finally {
       setLoading(false);
     }
@@ -57,18 +51,17 @@ export default function PatientsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar este paciente?")) return;
+    if (!window.confirm("¿Está seguro de que desea eliminar este paciente?")) return;
     setDeletingId(id);
     try {
       await deletePatient(id);
-      showToast("Paciente eliminado", "success");
+      showToast("Paciente eliminado correctamente", "success");
       fetchPatients();
     } catch (error) {
-      showToast(error.response?.data?.message || "Error al eliminar", "error");
+      showToast(error.response?.data?.message || "Error al eliminar el paciente", "error");
     } finally {
       setDeletingId(null);
     }
-    
   };
 
   return (
@@ -76,22 +69,25 @@ export default function PatientsPage() {
       <Sidebar />
       <div className="main-content">
         <Navbar />
-        <main className="p-4 flex-grow-1">
-          <h1 className="fs-3 fw-bold mb-4">
-            Bienvenido, {user?.user?.nombre || "Usuario"}
-          </h1>
-          
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="text-2xl mb-0">Pacientes</h2>
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              onClick={() => {
-                setEditingPatient(null);
-                setShowForm(true);
-              }}
-            >
-              Nuevo Paciente
-            </button>
+        <main className="patients-content">
+          <div className="patients-header">
+            <h1 className="welcome-title">
+              Bienvenido, {user?.user?.nombre || "Usuario"}
+            </h1>
+
+            <div className="patients-title-section">
+              <h2 className="page-title">Gestión de Pacientes</h2>
+              <button
+                className="btn-new-patient"
+                onClick={() => {
+                  setEditingPatient(null);
+                  setShowForm(true);
+                }}
+              >
+                <i className="fas fa-plus"></i>
+                Nuevo Paciente
+              </button>
+            </div>
           </div>
 
           {showForm && (
@@ -103,53 +99,68 @@ export default function PatientsPage() {
           )}
 
           {loading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600">Cargando pacientes...</p>
+            <div className="loading-container">
+              <div className="spinner"></div>
+              <p>Cargando pacientes...</p>
             </div>
           ) : (
-            <div className="overflow-y-auto max-h-[70vh] rounded-lg border border-gray-200">
-              <table className="w-full border-collapse bg-white">
+            <div className="patients-table-container">
+              <table className="patients-table">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border p-3 text-left font-semibold">Nombre</th>
-                    <th className="border p-3 text-left font-semibold">Apellido</th>
-                    <th className="border p-3 text-left font-semibold">Cédula</th>
-                    <th className="border p-3 text-left font-semibold">Teléfono</th>
-                    <th className="border p-3 text-left font-semibold">Email</th>
-                    <th className="border p-3 text-left font-semibold">Acciones</th>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Cédula</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {patients.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center p-4 text-gray-500">
-                        No hay pacientes registrados
+                      <td colSpan="6" className="no-patients">
+                        <div className="no-patients-content">
+                          <i className="fas fa-users"></i>
+                          <p>No hay pacientes registrados</p>
+                          <button
+                            className="btn-add-first"
+                            onClick={() => {
+                              setEditingPatient(null);
+                              setShowForm(true);
+                            }}
+                          >
+                            Agregar primer paciente
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ) : (
                     patients.map((p) => (
-                      <tr key={p._id} className="hover:bg-gray-50">
-                        <td className="border p-3">{p.nombre}</td>
-                        <td className="border p-3">{p.apellido}</td>
-                        <td className="border p-3">{p.cedula}</td>
-                        <td className="border p-3">{p.telefono}</td>
-                        <td className="border p-3">{p.email}</td>
-                        <td className="border p-3">
-                          <div className="flex space-x-2">
-                            <button
-                              className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                              onClick={() => handleEdit(p)}
-                            >
-                              Editar
-                            </button>
-                            <button
-                              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
-                              onClick={() => handleDelete(p._id)}
-                              disabled={deletingId === p._id}
-                            >
-                              {deletingId === p._id ? "Eliminando..." : "Eliminar"}
-                            </button>
-                          </div>
+                      <tr key={p._id} className="patient-row">
+                        <td className="patient-data">{p.nombre}</td>
+                        <td className="patient-data">{p.apellido}</td>
+                        <td className="patient-data">{p.cedula}</td>
+                        <td className="patient-data">{p.telefono}</td>
+                        <td className="patient-data">{p.email}</td>
+                        <td className="patient-actions">
+                          <button
+                            className="btn btn-sm btn-warning me-2"
+                            onClick={() => handleEdit(p)}
+                            title="Editar paciente"
+                          >
+                            ✏️ Editar
+                          </button>
+
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(p._id)}
+                            disabled={deletingId === p._id}
+                            title="Eliminar paciente"
+                          >
+                            🗑️ Eliminar
+                          </button>
+
                         </td>
                       </tr>
                     ))

@@ -1,0 +1,276 @@
+/* SpecialtiesPage.css */
+.dashboard-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+
+.specialties-content {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+/* Encabezado */
+.specialties-header {
+  margin-bottom: 30px;
+}
+
+.welcome-title {
+  color: #2d3748;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.specialties-title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  color: #2d3748;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.btn-new-specialty {
+  background: linear-gradient(135deg, #4a90e2 0%, #63b3ed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
+}
+
+.btn-new-specialty:hover {
+  background: linear-gradient(135deg, #3a7bc8 0%, #4a90e2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(74, 144, 226, 0.3);
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.loading-container p {
+  margin-top: 15px;
+  color: #718096;
+  font-size: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #4a90e2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Tabla de especialidades */
+.specialties-table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.specialties-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.specialties-table th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #2d3748;
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.specialties-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.specialty-row:hover {
+  background-color: #f8f9fa;
+}
+
+.specialty-data {
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.specialty-code {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.specialty-name {
+  font-weight: 500;
+}
+
+.specialty-description {
+  color: #718096;
+}
+
+/* Sin especialidades */
+.no-specialties {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.no-specialties-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.no-specialties-content i {
+  font-size: 48px;
+  color: #c3cfe2;
+}
+
+.no-specialties-content p {
+  color: #718096;
+  font-size: 16px;
+  margin: 0;
+}
+
+.btn-add-first {
+  background: linear-gradient(135deg, #4a90e2 0%, #63b3ed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.btn-add-first:hover {
+  background: linear-gradient(135deg, #3a7bc8 0%, #4a90e2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+}
+
+/* Acciones */
+.specialty-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-edit, .btn-delete {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.btn-edit:hover {
+  background-color: #bae7ff;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background-color: #fff2f0;
+  color: #ff4d4f;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background-color: #ffccc7;
+  transform: translateY(-2px);
+}
+
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .specialties-content {
+    padding: 15px;
+  }
+  
+  .specialties-title-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+  
+  .btn-new-specialty {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .specialties-table {
+    font-size: 14px;
+  }
+  
+  .specialties-table th,
+  .specialties-table td {
+    padding: 12px 10px;
+  }
+  
+  .specialty-actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .btn-edit, .btn-delete {
+    padding: 6px 10px;
+  }
+}

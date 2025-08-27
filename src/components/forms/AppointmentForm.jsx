@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createAppointment, updateAppointment } from "../../api/appointments.api.js";
 import { useToast } from "../../hooks/useToast.jsx";
+import "../styles/AppointmentForm.css"; // Importamos los estilos CSS
 
 export default function AppointmentForm({ appointment, onClose, onSaved, patients, specialties }) {
   const [codigo, setCodigo] = useState(appointment?.codigo || "");
@@ -55,10 +56,10 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
     try {
       if (appointment) {
         await updateAppointment(appointment._id, payload);
-        showToast("Cita actualizada", "success");
+        showToast("Cita actualizada correctamente", "success");
       } else {
         await createAppointment(payload);
-        showToast("Cita creada", "success");
+        showToast("Cita creada correctamente", "success");
       }
       onSaved();
       onClose();
@@ -70,72 +71,146 @@ export default function AppointmentForm({ appointment, onClose, onSaved, patient
   };
 
   const fields = [
-    { label: "Código", value: codigo, setter: setCodigo, type: "number" },
-    { label: "Descripción", value: descripcion, setter: setDescripcion },
-    { label: "Fecha y hora", value: fecha, setter: setFecha, type: "datetime-local" },
+    { 
+      label: "Código", 
+      value: codigo, 
+      setter: setCodigo, 
+      type: "number",
+      placeholder: "Ingrese el código",
+      required: true,
+      help: "Debe ser un número positivo"
+    },
+    { 
+      label: "Descripción", 
+      value: descripcion, 
+      setter: setDescripcion,
+      placeholder: "Ingrese la descripción de la cita",
+      required: true,
+      type: "textarea",
+      help: "Mínimo 5 caracteres"
+    },
+    { 
+      label: "Fecha y Hora", 
+      value: fecha, 
+      setter: setFecha, 
+      type: "datetime-local",
+      required: true
+    },
   ];
 
   return (
-    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: "rgba(0,0,0,0.3)", zIndex: 1050 }}>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-4 rounded shadow w-100" style={{ maxWidth: 400, maxHeight: "90vh", overflowY: "auto" }}
-      >
-        <h2 className="h5 mb-4">{appointment ? "Editar Cita" : "Nueva Cita"}</h2>
+    <div className="appointment-form-overlay">
+      <form onSubmit={handleSubmit} className="appointment-form">
+        <div className="form-header">
+          <h2>
+            <i className="fas fa-calendar-check"></i>
+            {appointment ? "Editar Cita" : "Nueva Cita"}
+          </h2>
+          <button type="button" className="btn-close-form" onClick={onClose}>
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
 
-        {fields.map((field, i) => (
-          <div className="mb-3" key={i}>
-            <label className="form-label">{field.label}</label>
-            <input
-              type={field.type || "text"}
-              value={field.value}
-              onChange={(e) => field.setter(e.target.value)}
-              className="form-control"
+        <div className="form-content">
+          {fields.map((field, index) => (
+            <div className="form-group" key={index}>
+              <label>
+                {field.label}
+                {field.required && <span className="required">*</span>}
+              </label>
+              
+              {field.type === 'textarea' ? (
+                <textarea
+                  value={field.value}
+                  onChange={(e) => field.setter(e.target.value)}
+                  className="form-textarea"
+                  placeholder={field.placeholder}
+                  rows="3"
+                  required={field.required}
+                />
+              ) : (
+                <input
+                  type={field.type || "text"}
+                  value={field.value}
+                  onChange={(e) => field.setter(e.target.value)}
+                  className="form-input"
+                  placeholder={field.placeholder}
+                  required={field.required}
+                />
+              )}
+              
+              {field.help && (
+                <small className="input-help">{field.help}</small>
+              )}
+            </div>
+          ))}
+
+          <div className="form-group">
+            <label>
+              Paciente
+              <span className="required">*</span>
+            </label>
+            <select
+              value={idPaciente}
+              onChange={(e) => setIdPaciente(e.target.value)}
+              className="form-input"
               required
-            />
+            >
+              <option value="">-- Seleccione un paciente --</option>
+              {patients && Array.isArray(patients) && patients.length > 0 ? (
+                patients.map(p => (
+                  <option key={p._id} value={p._id}>{p.nombre} {p.apellido}</option>
+                ))
+              ) : (
+                <option value="" disabled>No hay pacientes disponibles</option>
+              )}
+            </select>
           </div>
-        ))}
 
-        <div className="mb-3">
-          <label className="form-label">Paciente</label>
-          <select
-            value={idPaciente}
-            onChange={(e) => setIdPaciente(e.target.value)}
-            className="form-select"
-            required
-          >
-            <option value="">-- Seleccione un paciente --</option>
-            {patients && Array.isArray(patients) && patients.length > 0 ? (
-              patients.map(p => (
-                <option key={p._id} value={p._id}>{p.nombre} {p.apellido}</option>
-              ))
-            ) : (
-              <option value="" disabled>No hay pacientes disponibles</option>
-            )}
-          </select>
+          <div className="form-group">
+            <label>
+              Especialidad
+              <span className="required">*</span>
+            </label>
+            <select
+              value={idEspecialidad}
+              onChange={(e) => setIdEspecialidad(e.target.value)}
+              className="form-input"
+              required
+            >
+              <option value="">-- Seleccione una especialidad --</option>
+              {specialties && Array.isArray(specialties) && specialties.map(s => (
+                <option key={s._id} value={s._id}>{s.nombre}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="mb-3">
-          <label className="form-label">Especialidad</label>
-          <select
-            value={idEspecialidad}
-            onChange={(e) => setIdEspecialidad(e.target.value)}
-            className="form-select"
-            required
+        <div className="form-actions">
+          <button
+            type="button"
+            className="btn-cancel"
+            onClick={onClose}
+            disabled={saving}
           >
-            <option value="">-- Seleccione una especialidad --</option>
-            {specialties && Array.isArray(specialties) && specialties.map(s => (
-              <option key={s._id} value={s._id}>{s.nombre}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="d-flex justify-content-end mt-4">
-          <button type="button" className="btn btn-outline-secondary me-2" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Guardando..." : "Guardar"}
+          <button 
+            type="submit" 
+            className="btn-save"
+            disabled={saving}
+          >
+            {saving ? (
+              <>
+                <span className="spinner-small"></span>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-save"></i>
+                {appointment ? "Actualizar" : "Crear"} Cita
+              </>
+            )}
           </button>
         </div>
 

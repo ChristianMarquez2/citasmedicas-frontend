@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createPatient, updatePatient } from "../../api/patients.api.js";
 import { useToast } from "../../hooks/useToast.jsx";
+import "../styles/PatientForm.css"; // Importamos los estilos CSS
 
 export default function PatientForm({ patient, onClose, onSaved }) {
   const [nombre, setNombre] = useState(patient?.nombre || "");
@@ -14,7 +15,6 @@ export default function PatientForm({ patient, onClose, onSaved }) {
   const [email, setEmail] = useState(patient?.email || "");
 
   const { showToast, Toast } = useToast();
-
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -42,16 +42,26 @@ export default function PatientForm({ patient, onClose, onSaved }) {
       return;
     }
 
-    const payload = { nombre, apellido, cedula, fecha_nacimiento, genero, ciudad, direccion, telefono, email };
+    const payload = { 
+      nombre, 
+      apellido, 
+      cedula, 
+      fecha_nacimiento, 
+      genero, 
+      ciudad, 
+      direccion, 
+      telefono, 
+      email 
+    };
 
     setSaving(true);
     try {
       if (patient) {
         await updatePatient(patient._id, payload);
-        showToast("Paciente actualizado", "success");
+        showToast("Paciente actualizado correctamente", "success");
       } else {
         await createPatient(payload);
-        showToast("Paciente creado", "success");
+        showToast("Paciente creado correctamente", "success");
       }
       onSaved();
       onClose();
@@ -62,54 +72,165 @@ export default function PatientForm({ patient, onClose, onSaved }) {
     }
   };
 
-
   const fields = [
-    { label: "Nombre", value: nombre, setter: setNombre },
-    { label: "Apellido", value: apellido, setter: setApellido },
-    { label: "Cédula", value: cedula, setter: setCedula },
-    { label: "Fecha de Nacimiento", value: fecha_nacimiento, setter: setFechaNacimiento, type: "date" },
-    { label: "Género", value: genero, setter: setGenero },
-    { label: "Ciudad", value: ciudad, setter: setCiudad },
-    { label: "Dirección", value: direccion, setter: setDireccion },
-    { label: "Teléfono", value: telefono, setter: setTelefono },
-    { label: "Email", value: email, setter: setEmail, type: "email" },
+    { 
+      label: "Nombre", 
+      value: nombre, 
+      setter: setNombre, 
+      placeholder: "Ingrese el nombre",
+      required: true
+    },
+    { 
+      label: "Apellido", 
+      value: apellido, 
+      setter: setApellido, 
+      placeholder: "Ingrese el apellido",
+      required: true
+    },
+    { 
+      label: "Cédula", 
+      value: cedula, 
+      setter: setCedula, 
+      placeholder: "Ej: 1234567890",
+      required: true,
+      pattern: "\\d{10}",
+      help: "10 dígitos sin espacios ni guiones"
+    },
+    { 
+      label: "Fecha de Nacimiento", 
+      value: fecha_nacimiento, 
+      setter: setFechaNacimiento, 
+      type: "date",
+      required: true
+    },
+    { 
+      label: "Género", 
+      value: genero, 
+      setter: setGenero, 
+      type: "select",
+      options: ["", "Masculino", "Femenino", "Otro"],
+      placeholder: "Seleccione el género"
+    },
+    { 
+      label: "Ciudad", 
+      value: ciudad, 
+      setter: setCiudad, 
+      placeholder: "Ingrese la ciudad"
+    },
+    { 
+      label: "Dirección", 
+      value: direccion, 
+      setter: setDireccion, 
+      placeholder: "Ingrese la dirección completa",
+      type: "textarea"
+    },
+    { 
+      label: "Teléfono", 
+      value: telefono, 
+      setter: setTelefono, 
+      placeholder: "Ej: 0987654321",
+      pattern: "\\d{7,15}",
+      help: "7-15 dígitos sin espacios ni guiones"
+    },
+    { 
+      label: "Email", 
+      value: email, 
+      setter: setEmail, 
+      type: "email",
+      placeholder: "ejemplo@correo.com"
+    },
   ];
 
   return (
-    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: "rgba(0,0,0,0.3)", zIndex: 1050 }}>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-4 rounded shadow w-100" style={{ maxWidth: 400, maxHeight: "90vh", overflowY: "auto" }}
-      >
-        <h2 className="h5 mb-4">{patient ? "Editar Paciente" : "Nuevo Paciente"}</h2>
+    <div className="patient-form-overlay">
+      <form onSubmit={handleSubmit} className="patient-form">
+        <div className="form-header">
+          <h2>
+            <i className="fas fa-user-injured"></i>
+            {patient ? "Editar Paciente" : "Nuevo Paciente"}
+          </h2>
+          <button type="button" className="btn-close-form" onClick={onClose}>
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
 
-        {fields.map((field, i) => (
-          <div className="mb-3" key={i}>
-            <label className="form-label">{field.label}</label>
-            <input
-              type={field.type || "text"}
-              value={field.value}
-              onChange={(e) => field.setter(e.target.value)}
-              className="form-control"
-              required
-            />
-          </div>
-        ))}
+        <div className="form-grid">
+          {fields.map((field, index) => (
+            <div className={`form-group ${field.type === 'textarea' ? 'full-width' : ''}`} key={index}>
+              <label htmlFor={field.label.toLowerCase().replace(/\s+/g, '-')}>
+                {field.label}
+                {field.required && <span className="required">*</span>}
+              </label>
+              
+              {field.type === 'select' ? (
+                <select
+                  id={field.label.toLowerCase().replace(/\s+/g, '-')}
+                  value={field.value}
+                  onChange={(e) => field.setter(e.target.value)}
+                  className="form-input"
+                  required={field.required}
+                >
+                  {field.options.map((option, i) => (
+                    <option key={i} value={option}>
+                      {option || field.placeholder}
+                    </option>
+                  ))}
+                </select>
+              ) : field.type === 'textarea' ? (
+                <textarea
+                  id={field.label.toLowerCase().replace(/\s+/g, '-')}
+                  value={field.value}
+                  onChange={(e) => field.setter(e.target.value)}
+                  className="form-textarea"
+                  placeholder={field.placeholder}
+                  rows="3"
+                  required={field.required}
+                />
+              ) : (
+                <input
+                  id={field.label.toLowerCase().replace(/\s+/g, '-')}
+                  type={field.type || "text"}
+                  value={field.value}
+                  onChange={(e) => field.setter(e.target.value)}
+                  className="form-input"
+                  placeholder={field.placeholder}
+                  pattern={field.pattern}
+                  required={field.required}
+                />
+              )}
+              
+              {field.help && (
+                <small className="input-help">{field.help}</small>
+              )}
+            </div>
+          ))}
+        </div>
 
-        <div className="d-flex justify-content-end mt-4">
+        <div className="form-actions">
           <button
             type="button"
-            className="btn btn-outline-secondary me-2"
+            className="btn-cancel"
             onClick={onClose}
+            disabled={saving}
           >
             Cancelar
           </button>
-          <button
-            type="submit"
+          <button 
+            type="submit" 
+            className="btn-save"
             disabled={saving}
-            className="btn btn-primary"
           >
-            {saving ? "Guardando..." : "Guardar"}
+            {saving ? (
+              <>
+                <span className="spinner-small"></span>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-save"></i>
+                {patient ? "Actualizar" : "Crear"} Paciente
+              </>
+            )}
           </button>
         </div>
 

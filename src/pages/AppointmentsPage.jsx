@@ -8,6 +8,7 @@ import Navbar from "../components/layout/Navbar";
 import Sidebar from "../components/layout/Sidebar";
 import { useAuth } from "../hooks/useAuth";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/AppointmentsPage.css"; // Importamos los estilos CSS
 
 // Función helper para extraer el array de la respuesta
 const extractArray = (data, possibleKeys = ['data', 'items', 'patients', 'appointments', 'specialties']) => {
@@ -30,11 +31,13 @@ export default function AppointmentsPage() {
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
   const { showToast, Toast } = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
     document.title = "Citas - Dashboard";
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -44,10 +47,6 @@ export default function AppointmentsPage() {
       console.log("Especialidad en cita:", appointments[0].id_especialidad);
     }
   }, [appointments]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const fetchData = async () => {
     try {
@@ -78,14 +77,29 @@ export default function AppointmentsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar esta cita?")) return;
+    if (!window.confirm("¿Está seguro de que desea eliminar esta cita?")) return;
+    setDeletingId(id);
     try {
       await deleteAppointment(id);
-      showToast("Cita eliminada", "success");
+      showToast("Cita eliminada correctamente", "success");
       fetchData();
     } catch (error) {
-      showToast(error.response?.data?.message || "Error al eliminar cita", "error");
+      showToast(error.response?.data?.message || "Error al eliminar la cita", "error");
+    } finally {
+      setDeletingId(null);
     }
+  };
+
+  // Función para formatear la fecha
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -93,22 +107,25 @@ export default function AppointmentsPage() {
       <Sidebar />
       <div className="main-content">
         <Navbar />
-        <main className="p-4 flex-grow-1">
-          <h1 className="fs-3 fw-bold mb-4">
-            Bienvenido, {user?.user?.nombre || "Usuario"}
-          </h1>
-          
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="text-2xl mb-0">Citas</h2>
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              onClick={() => {
-                setEditingAppointment(null);
-                setShowForm(true);
-              }}
-            >
-              Nueva Cita
-            </button>
+        <main className="appointments-content">
+          <div className="appointments-header">
+            <h1 className="welcome-title">
+              Bienvenido, {user?.user?.nombre || "Usuario"}
+            </h1>
+
+            <div className="appointments-title-section">
+              <h2 className="page-title">Gestión de Citas</h2>
+              <button
+                className="btn-new-appointment"
+                onClick={() => {
+                  setEditingAppointment(null);
+                  setShowForm(true);
+                }}
+              >
+                <i className="fas fa-calendar-plus"></i>
+                Nueva Cita
+              </button>
+            </div>
           </div>
 
           {showForm && (
@@ -122,52 +139,74 @@ export default function AppointmentsPage() {
           )}
 
           {loading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600">Cargando citas...</p>
+            <div className="loading-container">
+              <div className="spinner"></div>
+              <p>Cargando citas...</p>
             </div>
           ) : (
-            <div className="overflow-y-auto max-h-[70vh] rounded-lg border border-gray-200">
-              <table className="w-full border-collapse bg-white">
+            <div className="appointments-table-container">
+              <table className="appointments-table">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border p-3 text-left font-semibold">Código</th>
-                    <th className="border p-3 text-left font-semibold">Descripción</th>
-                    <th className="border p-3 text-left font-semibold">Paciente</th>
-                    <th className="border p-3 text-left font-semibold">Especialidad</th>
-                    <th className="border p-3 text-left font-semibold">Fecha</th>
-                    <th className="border p-3 text-left font-semibold">Acciones</th>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Paciente</th>
+                    <th>Especialidad</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {appointments.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center p-4 text-gray-500">
-                        No hay citas registradas
+                      <td colSpan="6" className="no-appointments">
+                        <div className="no-appointments-content">
+                          <i className="fas fa-calendar-times"></i>
+                          <p>No hay citas registradas</p>
+                          <button
+                            className="btn-add-first"
+                            onClick={() => {
+                              setEditingAppointment(null);
+                              setShowForm(true);
+                            }}
+                          >
+                            Agregar primera cita
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ) : (
                     appointments.map((a) => (
-                      <tr key={a._id} className="hover:bg-gray-50">
-                        <td className="border p-3">{a.codigo}</td>
-                        <td className="border p-3">{a.descripcion}</td>
-                        <td className="border p-3">{a.id_paciente?.nombre} {a.id_paciente?.apellido}</td>
-                        <td className="border p-3">{a.id_especialidad?.nombre}</td>
-                        <td className="border p-3">{new Date(a.fecha).toLocaleString()}</td>
-                        <td className="border p-3">
-                          <div className="flex space-x-2">
-                            <button
-                              className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                              onClick={() => handleEdit(a)}
-                            >
-                              Editar
-                            </button>
-                            <button
-                              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                              onClick={() => handleDelete(a._id)}
-                            >
-                              Eliminar
-                            </button>
-                          </div>
+                      <tr key={a._id} className="appointment-row">
+                        <td className="appointment-data appointment-code">{a.codigo}</td>
+                        <td className="appointment-data appointment-description">{a.descripcion}</td>
+                        <td className="appointment-data appointment-patient">
+                          {a.id_paciente ? `${a.id_paciente.nombre} ${a.id_paciente.apellido}` : 'N/A'}
+                        </td>
+                        <td className="appointment-data appointment-specialty">
+                          {a.id_especialidad ? a.id_especialidad.nombre : 'N/A'}
+                        </td>
+                        <td className="appointment-data appointment-date">
+                          {a.fecha ? formatDate(a.fecha) : 'N/A'}
+                        </td>
+                        <td className="appointment-actions">
+                          <button
+                            className="btn btn-sm btn-warning me-2"
+                            onClick={() => handleEdit(a)}
+                            title="Editar cita"
+                          >
+                            ✏️ Editar
+                          </button>
+
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(a._id)}
+                            disabled={deletingId === a._id}
+                            title="Eliminar cita"
+                          >
+                            {deletingId === a._id ? "⏳ Eliminando..." : "🗑️ Eliminar"}
+                          </button>
+
                         </td>
                       </tr>
                     ))
